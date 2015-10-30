@@ -1,7 +1,9 @@
 #!/usr/bin/env python3 
+import smtplib
+import random
+
 from catfacts import catfacts
 from commands import folder
-import smtplib
 
 def sendEmail(gmail_sender,gmail_passwd,TO,SUBJECT,TEXT):
 	server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -23,5 +25,9 @@ def sendEmail(gmail_sender,gmail_passwd,TO,SUBJECT,TEXT):
 	server.quit()
 
 def getClients():
-	
-sendEmail('greyalien502@gmail.com','goatpotpie0','carlos.a@del-castillo.net','CAT',catfacts[122]+'\n')
+	fil = open(folder()+'cats/'+'clients')
+	return fil.read().splitlines()
+
+clients = getClients()
+fact = random.choice(catfacts)
+[sendemail('greyalien502@gmail.com','goatpotpie0',client,'CAT',fact) for client in clients]
