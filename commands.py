@@ -3,7 +3,7 @@ import os
 import json
 
 def folder():
-	return os.getenv('HOME')+"/.zerved/"
+	return os.getenv('HOME')+"/zerved/"
 
 def checkCreds(username,password):
 	userfile = open(folder()+"accounts",'r')
