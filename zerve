@@ -52,17 +52,23 @@ def process(content):
 			output = commands.file(content)
 		if command == 'preferences':
 			output = commands.preferences(content)
+		if command == 'preference':
+			output = commands.preference(content)
 		if command == 'cat':
 			output = commands.cat(content)
+		print(output)
+		send(sendback,json.dumps(output))
 	else:
-		output = 'You have not entered a correct password. You can log in <a href="login.html">here</a>. If you do not have an account or can not remember the password feel free to use the guest account.'
-	print(output)
-	send(sendback,json.dumps(output))
+		base.chat(sendback,'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."')
 
 hat = "zerving_hat"
 while True:
-	response = base.keep(hat)
+	try:
+		response = base.keep(hat)
+	except:
+		response = []
 	if 'events' in response:
 		for event in response['events']:
 			if event['type'] == 'disconnect':
 				process(json.loads(event['from']))
+	time.sleep(.01)

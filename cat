@@ -1,33 +1,34 @@
 #!/usr/bin/env python3 
-import smtplib
 import random
 
-from catfacts import catfacts
 from commands import folder
+from ezemail import sendEmail
 
-def sendEmail(gmail_sender,gmail_passwd,TO,SUBJECT,TEXT):
-	server = smtplib.SMTP('smtp.gmail.com', 587)
-	server.ehlo()
-	server.starttls()
-	server.ehlo()
-	server.login(gmail_sender, gmail_passwd)
+def getIndex():
+	fil = open(folder()+'cats/index','r')
+	out = int(fil.read())
+	fil.close()
+	return  out
 
-	BODY = '\r\n'.join(['To: %s' % TO,
-	'From: %s' % gmail_sender,
-	'Subject: %s' % SUBJECT,
-	'', TEXT])
+def setIndex(imput):
+	fil = open(folder()+'cats/index','w')
+	fil.write(imput)
+	fil.close()
 
-	try:
-		server.sendmail(gmail_sender, [TO], BODY)
-		print ('email sent')
-	except:
-		print ('error sending mail')
-	server.quit()
+def getFact():
+	index = getIndex()
+	f = open(folder()+'cats/catfacts','r')
+	out = f.read().splitlines()[index]
+	f.close
+	setIndex(str(index+1))
+	return out
 
 def getClients():
-	fil = open(folder()+'cats/'+'clients')
-	return fil.read().splitlines()
+	fil = open(folder()+'cats/clients')
+	out = fil.read().splitlines()
+	fil.close()
+	return out
 
 clients = getClients()
-fact = random.choice(catfacts)
-[sendemail('greyalien502@gmail.com','goatpotpie0',client,'CAT',fact) for client in clients]
+fact = getFact()
+[sendEmail('greyalien502@gmail.com','goatpotpie0',client,'Cat facts',fact) for client in clients]
