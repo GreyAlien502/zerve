@@ -1,6 +1,7 @@
 #!/usr/bin/env python3 
 import math
 import time
+import datetime
 import os
 import json
 import urllib
@@ -26,8 +27,6 @@ def send(destination,content):
 
 
 def process(content):
-	print(event)
-
 	sendback = content['sendback']
 	username = content['username']
 	password = content['password']
@@ -56,7 +55,6 @@ def process(content):
 			output = commands.preference(content)
 		if command == 'cat':
 			output = commands.cat(content)
-		print(output)
 		send(sendback,json.dumps(output))
 	else:
 		base.chat(sendback,'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."')
@@ -71,4 +69,8 @@ while True:
 		for event in response['events']:
 			if event['type'] == 'disconnect':
 				process(json.loads(event['from']))
+				'''.log(
+					"@"+datetime.datetime.utcnow()+' '+
+					event['command']+":"+
+					event['user'])'''
 	time.sleep(.01)

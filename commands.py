@@ -1,42 +1,10 @@
 import time
 import os
 import json
+import html
 
 import ezemail
-
-def folder():
-	return os.getenv('HOME')+"/zerved/"
-def readJSON(filename):
-	f = open(filename,'r')
-	out = json.load(f)
-	f.close()
-	return out
-def writeJSON(filename,content):
-	f = open(filename,'w')
-	out = f.write(json.dumps(content))
-	f.close()
-	return out
-
-def checkCreds(username,password):
-	userfile = open(folder()+"accounts",'r')
-	credlist = userfile.read().splitlines()
-	if not username: username = ''
-	if not password: password = ''
-	if(username+'|'+password in credlist):
-		return True
-	else:
-		return False
-
-def prefs(username):
-	return readJSON(folder()+"user/"+username+'/preferences')
-def message(username,content):
-	address = prefs(username)['message address']
-	ezemail.sendEmail()
-
-def login(contents):
-	return '<h1>Welcome. Enjoy your premium <a href="content.html#posts">membership.</a></h1>'
-def home(contents):
-	return 'Welcome '+contents['username']+'.'
+from basic import *
 
 def posts(contents):
 	postnames = os.listdir(folder()+'posts')
@@ -52,6 +20,8 @@ def posts(contents):
 def post(contents):
 	post = contents['data']
 	posttime = time.time()
+	post['title'] = html.escape(post['title'])
+	post['contents'] = html.escape(post['contents'])
 	post.update({'time':posttime,'author':contents['username'],'comments':[]})
 	writeJSON(folder()+'posts/'+str(posttime),post)
 	writeJSON(folder()+'comments/'+str(posttime),{"comments":[]})
@@ -66,13 +36,23 @@ def comments(contents):
 	return {'post':post,'comments':comments}
 def comment(contents):
 	posttime = time.time()
+	commentid=contents['data']['comment']
 	commentfilename = folder()+'comments/'+str(contents['data']['post'])
-	comments = readJSON(commentfilename)
-	comment = comments
-	for i in contents['data']['comment']:
-		comment = comment['comments'][i]
+	comments = readJSON(commentfilename)['comments']
+	def findComment(tree,commentid):
+		if tree['time']==commentid:
+			return tree
+		else:
+			for comment in tree['comments']:
+				status = findComment(comment,commentid)
+				if status:
+					return status
+			return False
+
+	comment = findComment({'time':contents['data']['post'], 'comments':comments},commentid)
+
 	comment['comments'].append({'time':posttime,'author':contents['username'],'content':contents['data']['content'],'comments':[]})
-	writeJSON(commentfilename, comments)
+	writeJSON(commentfilename, {'comments':comments})
 	return {'message':'Commented!','post':contents['data']['post']}
 
 def files(contents):
