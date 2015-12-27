@@ -59,7 +59,7 @@ def process(content):
 	else:
 		base.chat(sendback,'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."')
 
-hat = "zerving_hat"
+hat = "zerving_hat:files"
 while True:
 	try:
 		response = base.keep(hat)

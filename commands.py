@@ -72,6 +72,7 @@ def file(contents):
 	content = contents['data']['content']
 	path = folder()+'user/'+contents['username']+'/files/'+ subpath
 	if '..' in path: return 'You cant have a \'..\' in a filename, got it?'
+	if path[0]=='/': return 'You cant have a \./\' start a filename, k?'
 	dest = open(path,'w')
 	dest.write(content)
 	dest.close()
