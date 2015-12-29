@@ -56,7 +56,7 @@ def comment(contents):
 	return {'message':'Commented!','post':contents['data']['post']}
 
 def files(contents):
-	subpath = contents['data']['path']
+	subpath = '/'.join(contents['data']['path'])
 	path = folder()+'user/'+contents['username']+'/files/'+ subpath
 	if '..' in path: return 'You cant have a \'..\' in a filename, got it?'
 	if os.path.isdir(path):
