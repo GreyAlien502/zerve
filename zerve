@@ -33,6 +33,7 @@ def process(content):
 	command  = content['command' ]
 
 	if (commands.checkCreds(username,password)):
+		print(content)
 		if command == 'login':
 			output = commands.login(content)
 		if command == 'home':
@@ -47,8 +48,14 @@ def process(content):
 			output = commands.comment(content)
 		if command == 'files':
 			output = commands.files(content)
-		if command == 'file':
-			output = commands.file(content)
+		if command == 'addFile':
+			output = commands.addFile(content)
+		if command == 'removeFile':
+			output = commands.removeFile(content)
+		if command == 'renameFile':
+			output = commands.renameFile(content)
+		if command == 'editFile':
+			output = commands.editFile(content)
 		if command == 'preferences':
 			output = commands.preferences(content)
 		if command == 'preference':
