@@ -33,6 +33,7 @@ def process(content):
 	command  = content['command' ]
 
 	if (commands.checkCreds(username,password)):
+		print(content)
 		if command == 'login':
 			output = commands.login(content)
 		if command == 'home':
@@ -47,8 +48,14 @@ def process(content):
 			output = commands.comment(content)
 		if command == 'files':
 			output = commands.files(content)
-		if command == 'file':
-			output = commands.file(content)
+		if command == 'addFile':
+			output = commands.addFile(content)
+		if command == 'removeFile':
+			output = commands.removeFile(content)
+		if command == 'renameFile':
+			output = commands.renameFile(content)
+		if command == 'editFile':
+			output = commands.editFile(content)
 		if command == 'preferences':
 			output = commands.preferences(content)
 		if command == 'preference':
@@ -59,7 +66,7 @@ def process(content):
 	else:
 		base.chat(sendback,'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."')
 
-hat = "zerving_hat:files"
+hat = "zerving_hat"
 while True:
 	try:
 		response = base.keep(hat)
@@ -73,4 +80,4 @@ while True:
 					"@"+datetime.datetime.utcnow()+' '+
 					event['command']+":"+
 					event['user'])'''
-	time.sleep(.01)
+	time.sleep(.4)
