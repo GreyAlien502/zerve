@@ -57,6 +57,13 @@ def comment(contents):
 
 def checkPath(path):
 	if '..' in path: return 'You cant have a \'..\' in a filename, got it?'
+	return False
+def checkFilename(name):
+	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
+	for char in name: 
+		if char not in alphabet:
+			return False
+	return True
 	
 def files(contents):
 	subpath = '/'.join(contents['data']['path'])
@@ -73,12 +80,6 @@ def files(contents):
 def addFile(contents):
 	path = folder()+'user/'+contents['username']+'/files/'+ '/'.join(contents['data']['path'])
 	if checkPath(path):return checkPath(path)
-	def checkFilename(name):
-		alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
-		for char in name:
-			if char not in alphabet:
-				return False
-		return True
 	if not checkFilename(path.split('/')[-1]): return 'bad name'
 	if contents['data']['type'] == 'file':
 		open(path,'w').close()
@@ -95,30 +96,20 @@ def removeFile(contents):
 	return 'success'
 def renameFile(contents):
 	path = folder()+'user/'+contents['username']+'/files/'+ '/'.join(contents['data']['path'])
-	if checkPath(path):return checkPath(path)
+	if checkPath(path):return {'error':checkPath(path), 'path':path}
+	if not checkFilename(contents['data']['newname']): return {'error':'bad name', 'path':path}
 	newpath = '/'.join(path.split('/')[:-1]+ [contents['data']['newname']])
-	if checkPath(newpath):return checkPath(newpath)
+	if checkPath(newpath):return {'error':checkPath(newpath), 'path':path}
 	os.rename(path,newpath)
 	return {'path':'/'.join(contents['data']['path'][:-1]+ [contents['data']['newname']])}
 def editFile(contents):
 	path = folder()+'user/'+contents['username']+'/files/'+ '/'.join(contents['data']['path'])
 	if checkPath(path):return checkPath(path)
 	data = contents['data']['data']
-	print(path)
 	f=open(path,'w')
 	f.write(data)
 	f.close()
 	return 'success'
-
-def file(contents):
-	subpath = contents['data']['path']+contents['data']['title']
-	content = contents['data']['content']
-	path = folder()+'user/'+contents['username']+'/files/'+ subpath
-	if '..' in path: return 'You cant have a \'..\' in a filename, got it?'
-	if path[0]=='/': return 'You cant have a \./\' start a filename, k?'
-	dest = open(path,'w')
-	dest.write(content)
-	dest.close()
 
 def preferences(contents):
 	return prefs(contents['username'])
