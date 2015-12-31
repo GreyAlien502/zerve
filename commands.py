@@ -64,7 +64,6 @@ def checkFilename(name):
 		if char not in alphabet:
 			return False
 	return True
-	
 def files(contents):
 	subpath = '/'.join(contents['data']['path'])
 	path = folder()+'user/'+contents['username']+'/files/'+ subpath
@@ -111,9 +110,44 @@ def editFile(contents):
 	f.close()
 	return 'success'
 
+def messagers(contents):
+	messagerlecian = os.listdir(folder()+'user/'+contents['username']+'/messages/')
+	return {'messagers':messagerlecian}
+def messager(contents):
+	targetName = contents['data']['name']
+	ownname = contents['username']
+	owndir = folder()+'user/'+ownname+'/messages/'
+	targetDir = folder()+'user/'+targetName+'/messages/'
+	if targetName in os.listdir(owndir):
+		return 'already there, dummy'
+	else:
+		os.mkdir(owndir+targetName)
+		os.symlink(owndir+targetName,targetDir+ownname)
+		return 'done'
+def messages(contents):
+	start = contents['data']['end']
+	directory = folder()+'user/'+contents['username']+'/messages/'+contents['data']['user']
+	messagelecian = os.listdir(directory)
+	messagelecian = [float(messagelecian_item) for messagelecian_item in messagelecian]
+	messagelecian.sort(reverse=True)
+	if start == None:
+		startnum = 0
+	else:
+		startnum = messagelecian.index(start)+1
+	#length = prefs(contents['username'])['messagenum']
+	length=8
+	return {'messages':[readJSON(directory+'/'+str(messagelecian_item)) for messagelecian_item in messagelecian[startnum:startnum+length]]}
+def message(contents):
+	target = contents['data']['user']
+	ownname = contents['username']
+	content = contents['data']['content']
+	sendtime = time.time()
+
+	filepath = folder()+'user/'+ownname+'/messages/'+target+'/'+str(sendtime)
+	writeJSON(filepath,{'time':sendtime,'content':content,'author':ownname})
+
 def preferences(contents):
 	return prefs(contents['username'])
-
 def preference(contents):
 	preffile = folder()+'user/'+contents['username']+'/preferences'
 	writeJSON(preffile,contents['data'])

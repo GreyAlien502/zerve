@@ -1,10 +1,11 @@
+import os
 from basic import *
 
-def setPreferences(keys):
-	usernames = [user['username'] for user in readJSON(folder()+accounts)]
+def addPreference(keys):
+	usernames = [user['username'] for user in os.listdir(folder()+accounts)]
 	for username in usernames:
 		actuaprefs = prefs(username):
-		for key in keys:
-			if key not in actuaprefs:
-				prefs.update(key:'')
-		writeJSON
+		if key not in actuaprefs:
+			actuaprefs.update({key:''})
+		preffile = folder()+'user/'+contents['username']+'/preferences'
+		writeJSON(preffile,actuaprefs)

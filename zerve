@@ -57,6 +57,14 @@ def process(content):
 			output = commands.renameFile(content)
 		if command == 'editFile':
 			output = commands.editFile(content)
+		if command == 'messagers':
+			output = commands.messagers(content)
+		if command == 'messager':
+			output = commands.messager(content)
+		if command == 'messages':
+			output = commands.messages(content)
+		if command == 'message':
+			output = commands.message(content)
 		if command == 'preferences':
 			output = commands.preferences(content)
 		if command == 'preference':
