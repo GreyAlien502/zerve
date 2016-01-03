@@ -145,6 +145,10 @@ def message(contents):
 
 	filepath = folder()+'user/'+ownname+'/messages/'+target+'/'+str(sendtime)
 	writeJSON(filepath,{'time':sendtime,'content':content,'author':ownname})
+	targetPrefs = prefs(target)
+	if targetPrefs['email messages'] != '':
+		ezemail.send(targetPrefs['email address'])
+		
 
 def preferences(contents):
 	return prefs(contents['username'])

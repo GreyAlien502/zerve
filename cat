@@ -31,4 +31,4 @@ def getClients():
 
 clients = getClients()
 fact = getFact()
-[sendEmail('greyalien502@gmail.com','goatpotpie0',client,'Cat facts',fact) for client in clients]
+[sendEmail(client,'Cat facts',fact) for client in clients]

@@ -1,5 +1,12 @@
 import smtplib
-def sendEmail(gmail_sender,gmail_passwd,TO,SUBJECT,TEXT):
+from basic import folder
+
+def sendEmail(TO,SUBJECT,TEXT):
+	f = open(folder()+'emailpassword','r')
+	gmail_passwd = f.read()
+	f.close()
+	gmail_sender = 'greyalien502@gmail.com'
+
 	server = smtplib.SMTP('smtp.gmail.com', 587)
 	server.ehlo()
 	server.starttls()
@@ -17,5 +24,3 @@ def sendEmail(gmail_sender,gmail_passwd,TO,SUBJECT,TEXT):
 	except:
 		print ('error sending mail')
 	server.quit()
-
-
