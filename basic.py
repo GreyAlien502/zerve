@@ -2,8 +2,6 @@ import time
 import os
 import json
 
-import ezemail
-
 def folder():
 	return os.getenv('HOME')+"/zerved/"
 def readJSON(filename):
@@ -28,9 +26,6 @@ def checkCreds(username,password):
 
 def prefs(username):
 	return readJSON(folder()+"user/"+username+'/preferences')
-def message(username,content):
-	address = prefs(username)['message address']
-	ezemail.sendEmail()
 
 def login(contents):
 	return '<h1>Welcome. Enjoy your premium <a href="content.html#posts">membership.</a></h1>'

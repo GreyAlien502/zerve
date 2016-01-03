@@ -10,6 +10,7 @@ import urllib
 import life.commands
 import life.basiccommands as base
 import commands
+import basic
 
 
 def send(destination,content):
@@ -33,8 +34,9 @@ def process(content):
 	password = content['password']
 	command  = content['command' ]
 
+	print(content)
+	basic.log(str(time.time())+':\t'+str(content)+'\n')
 	if (commands.checkCreds(username,password)):
-		print(content)
 		if command == 'login':
 			output = commands.login(content)
 		if command == 'home':
@@ -63,6 +65,8 @@ def process(content):
 			output = commands.messager(content)
 		if command == 'messages':
 			output = commands.messages(content)
+		if command == 'updateMessages':
+			output = commands.updateMessages(content)
 		if command == 'message':
 			output = commands.message(content)
 		if command == 'preferences':

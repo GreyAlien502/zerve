@@ -137,6 +137,14 @@ def messages(contents):
 	#length = prefs(contents['username'])['messagenum']
 	length=8
 	return {'messages':[readJSON(directory+'/'+str(messagelecian_item)) for messagelecian_item in messagelecian[startnum:startnum+length]]}
+def updateMessages(contents):
+	end = contents['data']['start']
+	directory = folder()+'user/'+contents['username']+'/messages/'+contents['data']['user']
+	messagelecian = os.listdir(directory)
+	messagelecian = [float(messagelecian_item) for messagelecian_item in messagelecian]
+	messagelecian.sort(reverse=True)
+	endnum = messagelecian.index(end)
+	return {'messages':[readJSON(directory+'/'+str(messagelecian_item)) for messagelecian_item in messagelecian[:endnum]]}
 def message(contents):
 	target = contents['data']['user']
 	ownname = contents['username']
@@ -145,9 +153,6 @@ def message(contents):
 
 	filepath = folder()+'user/'+ownname+'/messages/'+target+'/'+str(sendtime)
 	writeJSON(filepath,{'time':sendtime,'content':content,'author':ownname})
-	targetPrefs = prefs(target)
-	if targetPrefs['email messages'] != '':
-		ezemail.send(targetPrefs['email address'])
 		
 
 def preferences(contents):
