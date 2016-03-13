@@ -1,5 +1,5 @@
 #!/usr/bin/env python3 
-import random
+#import random
 
 from commands import folder
 from ezemail import sendEmail

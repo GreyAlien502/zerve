@@ -1,11 +1,11 @@
 #!/usr/bin/env python3 
 import math
 import time
-import datetime
-import os
+#import datetime
+#import os
 import sys
 import json
-import urllib
+#import urllib
 
 import life.commands
 import life.basiccommands as base
@@ -80,7 +80,7 @@ def process(content):
 		base.chat(sendback,'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."')
 
 hat = "zerving_hat"
-print ('working')
+#print ('working')
 while True:
 	sys.stdout.write('.')
 	sys.stdout.flush()
@@ -97,4 +97,4 @@ while True:
 					"@"+datetime.datetime.utcnow()+' '+
 					event['command']+":"+
 					event['user'])'''
-	time.sleep(.4)
+	time.sleep(.1)
