@@ -28,7 +28,7 @@ def prefs(username):
 	return readJSON(folder()+"user/"+username+'/preferences')
 
 def login(contents):
-	return '<h1>Welcome. Enjoy your premium <a href="content.html#posts">membership.</a></h1>'
+	return {'status':0,'message':'<h1>Welcome. Enjoy your premium <a href="content.html#posts">membership.</a></h1>'}
 def home(contents):
 	return 'Welcome '+contents['username']+'.'
 

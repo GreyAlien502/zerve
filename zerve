@@ -75,9 +75,9 @@ def process(content):
 			output = commands.preference(content)
 		if command == 'cat':
 			output = commands.cat(content)
-		send(sendback,json.dumps(output))
 	else:
-		base.chat(sendback,'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."')
+		output = {'status':1,'message':'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."'}
+	send(sendback,json.dumps(output))
 
 hat = "zerving_hat"
 #print ('working')
@@ -97,4 +97,4 @@ while True:
 					"@"+datetime.datetime.utcnow()+' '+
 					event['command']+":"+
 					event['user'])'''
-	time.sleep(.1)
+	time.sleep(.8)

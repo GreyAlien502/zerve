@@ -25,7 +25,7 @@ def post(contents):
 	post.update({'time':posttime,'author':contents['username'],'comments':[]})
 	writeJSON(folder()+'posts/'+str(posttime),post)
 	writeJSON(folder()+'comments/'+str(posttime),{"comments":[]})
-	return 'Sent!'
+	return {'status':0}
 	
 
 def comments(contents):
@@ -56,7 +56,7 @@ def comment(contents):
 	return {'message':'Commented!','post':contents['data']['post']}
 
 def checkPath(path):
-	if '..' in path: return 'You cant have a \'..\' in a filename, got it?'
+	if '..' in path: return {'status':0,'excuse':'You cant have a \'..\' in a filename, got it?'}
 	return False
 def checkFilename(name):
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
@@ -79,12 +79,12 @@ def files(contents):
 def addFile(contents):
 	path = folder()+'user/'+contents['username']+'/files/'+ '/'.join(contents['data']['path'])
 	if checkPath(path):return checkPath(path)
-	if not checkFilename(path.split('/')[-1]): return 'bad name'
+	if not checkFilename(path.split('/')[-1]): return {'status':1,'excuse':'bad name'}
 	if contents['data']['type'] == 'file':
 		open(path,'w').close()
 	else:
 		os.mkdir(path)
-	return 'success'
+	return {'status':'0'}
 def removeFile(contents):
 	path = folder()+'user/'+contents['username']+'/files/'+ '/'.join(contents['data']['path'])
 	if checkPath(path):return checkPath(path)
@@ -92,13 +92,13 @@ def removeFile(contents):
 		os.rmdir(path)
 	else:
 		os.remove(path)
-	return 'success'
+	return {'status':'0'}
 def renameFile(contents):
 	path = folder()+'user/'+contents['username']+'/files/'+ '/'.join(contents['data']['path'])
-	if checkPath(path):return {'error':checkPath(path), 'path':path}
-	if not checkFilename(contents['data']['newname']): return {'error':'bad name', 'path':path}
+	if checkPath(path):return checkPath(path)
+	if not checkFilename(contents['data']['newname']): return {'status':1,'excuse':'bad name', 'path':path}
 	newpath = '/'.join(path.split('/')[:-1]+ [contents['data']['newname']])
-	if checkPath(newpath):return {'error':checkPath(newpath), 'path':path}
+	if checkPath(newpath):return checkPath(newpath)
 	os.rename(path,newpath)
 	return {'path':'/'.join(contents['data']['path'][:-1]+ [contents['data']['newname']])}
 def editFile(contents):
@@ -108,7 +108,7 @@ def editFile(contents):
 	f=open(path,'w')
 	f.write(data)
 	f.close()
-	return 'success'
+	return {'status':'0'}
 
 def messagers(contents):
 	messagerlecian = os.listdir(folder()+'user/'+contents['username']+'/messages/')
@@ -119,11 +119,12 @@ def messager(contents):
 	owndir = folder()+'user/'+ownname+'/messages/'
 	targetDir = folder()+'user/'+targetName+'/messages/'
 	if targetName in os.listdir(owndir):
-		return 'already there, dummy'
+		return {'status':1,'excuse':'already there, dummy'}
 	else:
 		os.mkdir(owndir+targetName)
 		os.symlink(owndir+targetName,targetDir+ownname)
-		return 'done'
+		return {'status':'0'}
+
 def messages(contents):
 	start = contents['data']['end']
 	directory = folder()+'user/'+contents['username']+'/messages/'+contents['data']['user']
@@ -156,15 +157,15 @@ def message(contents):
 		
 
 def preferences(contents):
-	return prefs(contents['username'])
+	return {'prefs':prefs(contents['username'])}
 def preference(contents):
 	preffile = folder()+'user/'+contents['username']+'/preferences'
 	writeJSON(preffile,contents['data'])
-	return 'success'
+	return {'status':'0'}
 
 
 def cat(contents):
 	to = contents['data']['to']
 	catfile = open(folder()+'cats/clients','a')
 	catfile.write(to+'\n')
-	return 'success'
+	return {'status':'0'}
