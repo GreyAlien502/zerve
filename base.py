@@ -1,24 +1,31 @@
 from basic import *
 import json
+import os
 
 def chat(destination,content):
+	if destination == None:
+		destination = 'zerving_hat'
 	filename = folder() + 'tmp/' + destination
-	f = open(filename,'w+')
+	print(filename)
 	try:
+		f = open(filename,'r+')
+		f.seek(0)
 		messages = json.load(f)
-	except json.JSONDecodeError:
+		f.seek(0)
+	except FileNotFoundError:
+		f = open(filename,'w')
 		messages = []
 	messages.append(content)
 	json.dump(messages,f)
+	f.truncate()
 	f.close()
 
 def keep(ID='zerving_hat'):
 	filename = folder() + 'tmp/' + ID
-	f = open(filename,'w+')
 	try:
+		f = open(filename,'r')
 		messages = json.load(f)
-	except json.JSONDecodeError:
+		os.remove(filename)
+	except FileNotFoundError:
 		messages = []
-	json.dump([],f)
-	f.close()
 	return messages

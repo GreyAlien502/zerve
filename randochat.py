@@ -16,8 +16,8 @@ def chat():
 	ID = request.args.get('id')
 	to = request.args.get('to')
 	if cmd == 'chat':
-		base.chat({"to":ID,"from":to,"type":"disconnect","time":datetime.now().strftime("%H:%M%:S")})
+		base.chat(ID,{"to":ID,"from":to,"type":"disconnect","time":datetime.now().strftime("%H:%M%:S")})
 		return callback+'('+json.dumps({"cmd":"chat","res":"1","desc":"send succeed"})+');'
 
 if __name__ == "__main__":
-        app.run(port=80, debug=False)
+        app.run(port=80, debug=True)
