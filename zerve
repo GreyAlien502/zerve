@@ -7,8 +7,7 @@ import sys
 import json
 #import urllib
 
-import life.commands
-import life.basiccommands as base
+import base
 import commands
 import basic
 

@@ -6,16 +6,19 @@ def chat(destination,content):
 	f = open(filename,'w+')
 	try:
 		messages = json.load(f)
-	except JSONDecodeError:
+	except json.JSONDecodeError:
 		messages = []
 	messages.append(content)
 	json.dump(messages,f)
 	f.close()
 
-def keep(id=None):
-	filename = folder() + 'tmp/' + 'zerving_hat'
+def keep(ID='zerving_hat'):
+	filename = folder() + 'tmp/' + ID
 	f = open(filename,'w+')
-	messages = json.load(f)
+	try:
+		messages = json.load(f)
+	except json.JSONDecodeError:
+		messages = []
 	json.dump([],f)
 	f.close()
 	return messages

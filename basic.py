@@ -3,7 +3,8 @@ import os
 import json
 
 def folder():
-	return os.getenv('HOME')+"/zerved/"
+	return '/home/greyalien502/zerved/'
+	#return os.getenv('HOME')+"/zerved/"
 def readJSON(filename):
 	f = open(filename,'r')
 	out = json.load(f)
