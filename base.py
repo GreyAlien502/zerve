@@ -12,7 +12,7 @@ def chat(destination,content):
 		f.seek(0)
 		messages = json.load(f)
 		f.seek(0)
-	except FileNotFoundError:
+	except IOError:
 		f = open(filename,'w')
 		messages = []
 	messages.append(content)
@@ -26,6 +26,6 @@ def keep(ID='zerving_hat'):
 		f = open(filename,'r')
 		messages = json.load(f)
 		os.remove(filename)
-	except FileNotFoundError:
+	except IOError:
 		messages = []
 	return messages
