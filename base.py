@@ -1,23 +1,23 @@
 from basic import *
 import json
 import os
+from datetime import datetime
 
 def chat(destination,content):
 	if destination == None:
 		destination = 'zerving_hat'
 	filename = folder() + 'tmp/' + destination
-	print(filename)
+	message = {"to":destination,"from":content,"type":"disconnect","time":datetime.now().strftime("%H:%M%:S")}
 	try:
 		f = open(filename,'r+')
-		f.seek(0)
 		messages = json.load(f)
 		f.seek(0)
 	except IOError:
-		f = open(filename,'w')
+		f = open(filename,'w+')
+		print('error')
 		messages = []
-	messages.append(content)
+	messages.append(message)
 	json.dump(messages,f)
-	f.truncate()
 	f.close()
 
 def keep(ID='zerving_hat'):
@@ -28,4 +28,4 @@ def keep(ID='zerving_hat'):
 		os.remove(filename)
 	except IOError:
 		messages = []
-	return messages
+	return {"cmd":"keep","res":"1","desc":"keep succeed","events":messages}
