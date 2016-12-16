@@ -1,99 +1,114 @@
 #!/usr/bin/env python3 
+import cherrypy
+
 import math
 import time
-#import datetime
-#import os
 import sys
 import json
-#import urllib
 
 import base
 import commands
 import basic
 
+class zerver():
+	@cherrypy.expose(['memebers.js'])
+	@cherrypy.tools.json_out()
+	def memebers(self, username, password, command, data):
+		cherrypy.response.headers['Content-Type']= 'application/json'
+		content = {
+			'username':username,
+			'password':password,
+			'command':command,
+			'data':json.loads(data)}
+		if (commands.checkCreds(username,password)):
+			try:
+				if command == 'login':
+					output = commands.login(content)
+				if command == 'home':
+					output = commands.home(content)
+				if command == 'posts':
+					output = commands.posts(content)
+				if command == 'post':
+					output = commands.post(content)
+				if command == 'comments':
+					output = commands.comments(content)
+				if command == 'comment':
+					output = commands.comment(content)
+				if command == 'files':
+					output = commands.files(content)
+				if command == 'addFile':
+					output = commands.addFile(content)
+				if command == 'removeFile':
+					output = commands.removeFile(content)
+				if command == 'renameFile':
+					output = commands.renameFile(content)
+				if command == 'editFile':
+					output = commands.editFile(content)
+				if command == 'messagers':
+					output = commands.messagers(content)
+				if command == 'messager':
+					output = commands.messager(content)
+				if command == 'messages':
+					output = commands.messages(content)
+				if command == 'updateMessages':
+					output = commands.updateMessages(content)
+				if command == 'message':
+					output = commands.message(content)
+				if command == 'preferences':
+					output = commands.preferences(content)
+				if command == 'preference':
+					output = commands.preference(content)
+				if command == 'cat':
+					output = commands.cat(content)
 
-def send(destination,content):
-	block_size = 2300
-	checkconnection=False
-	if len(content) < block_size:
-		base.chat(destination,'0'+content)
-	else:
-		blocked_size = block_size*math.floor(len(content)/block_size)
-		lecian = [content[i:i+block_size] for i in range(block_size,len(content)-block_size,block_size)]
-		
-		base.chat(destination,'1'+content[:block_size])
-		for lecian_item in lecian:
-			base.chat(destination,'1'+lecian_item)
-		base.chat(destination,'0'+content[blocked_size:])
+				cherrypy.response.headers["Access-Control-Allow-Origin"] = '*'
+				return output
+			except KeyError: pass
+		raise cherrypy.HTTPError(403)
+
+cherrypy.config.update({
+	'server.socket_host': '0.0.0.0',
+	'tools.encode.on': True,
+	'tools.encode.encoding': 'utf-8'
+})
+
+if __name__ == '__main__':
+	cherrypy.quickstart(zerver(),'/')
+
+'''
+	def send(destination,content):
+		block_size = 2300
+		checkconnection=False
+		if len(content) < block_size:
+			base.chat(destination,'0'+content)
+		else:
+			blocked_size = block_size*math.floor(len(content)/block_size)
+			lecian = [content[i:i+block_size] for i in range(block_size,len(content)-block_size,block_size)]
+			
+			base.chat(destination,'1'+content[:block_size])
+			for lecian_item in lecian:
+				base.chat(destination,'1'+lecian_item)
+			base.chat(destination,'0'+content[blocked_size:])
 
 
-def process(content):
-	sendback = content['sendback']
-	username = content['username']
-	password = content['password']
-	command  = content['command' ]
 
-	print(content)
-	basic.log(str(time.time())+':\t'+str(content)+'\n')
-	if (commands.checkCreds(username,password)):
-		if command == 'login':
-			output = commands.login(content)
-		if command == 'home':
-			output = commands.home(content)
-		if command == 'posts':
-			output = commands.posts(content)
-		if command == 'post':
-			output = commands.post(content)
-		if command == 'comments':
-			output = commands.comments(content)
-		if command == 'comment':
-			output = commands.comment(content)
-		if command == 'files':
-			output = commands.files(content)
-		if command == 'addFile':
-			output = commands.addFile(content)
-		if command == 'removeFile':
-			output = commands.removeFile(content)
-		if command == 'renameFile':
-			output = commands.renameFile(content)
-		if command == 'editFile':
-			output = commands.editFile(content)
-		if command == 'messagers':
-			output = commands.messagers(content)
-		if command == 'messager':
-			output = commands.messager(content)
-		if command == 'messages':
-			output = commands.messages(content)
-		if command == 'updateMessages':
-			output = commands.updateMessages(content)
-		if command == 'message':
-			output = commands.message(content)
-		if command == 'preferences':
-			output = commands.preferences(content)
-		if command == 'preference':
-			output = commands.preference(content)
-		if command == 'cat':
-			output = commands.cat(content)
-	else:
-		output = {'status':1,'message':'"You have not entered a correct password. You can log in. If you do not have an account or can not remember the password feel free to use the guest account (guest, guest)."'}
-	send(sendback,json.dumps(output))
-
-hat = "zerving_hat"
+	hat = "zerving_hat"
 #print ('working')
-while True:
-	#sys.stdout.write('.')
-	#sys.stdout.flush()
-	try:
-		response = base.keep(hat)
-	except:
-		response = []
-	if 'events' in response:
-		#print()
-		for event in response['events']:
-			if event['type'] == 'disconnect':
-				process(json.loads(event['from']))
-				'''.log(
-					"@"+datetime.datetime.utcnow()+' '+
-					event['command']+":"+
-					event['user'])'''
-	time.sleep(.8)
+	while True:
+		#sys.stdout.write('.')
+		#sys.stdout.flush()
+		try:
+			response = base.keep(hat)
+		except:
+			response = []
+		if 'events' in response:
+			#print()
+			for event in response['events']:
+				if event['type'] == 'disconnect':
+					process(json.loads(event['from']))
+					.log(
+						"@"+datetime.datetime.utcnow()+' '+
+						event['command']+":"+
+						event['user'])
+		time.sleep(.8)
+	'''
