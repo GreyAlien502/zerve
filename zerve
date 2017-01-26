@@ -73,6 +73,7 @@ cherrypy.config.update({
 })
 
 if __name__ == '__main__':
+	cherrypy.config.update({'environment' : 'production'})
 	cherrypy.quickstart(zerver(),'/')
 
 '''
