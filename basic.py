@@ -1,10 +1,10 @@
 import time
 import os
+import pathlib
 import json
 
 def folder():
-	return '/home/pi/zerved/'
-	#return os.getenv('HOME')+"/zerved/"
+	return str(pathlib.Path.home())+"/zerved/"
 def readJSON(filename):
 	f = open(filename,'r')
 	out = json.load(f)
