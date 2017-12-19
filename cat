@@ -3,6 +3,7 @@
 
 from commands import folder
 from ezemail import sendEmail
+import codecs
 
 def getIndex():
 	fil = open(folder()+'cats/index','r')
@@ -17,7 +18,7 @@ def setIndex(imput):
 
 def getFact():
 	index = getIndex()
-	f = open(folder()+'cats/catfacts','r')
+	f = codecs.open(folder()+'cats/catfacts','r','utf-8')
 	out = f.read().splitlines()[index]
 	f.close
 	setIndex(str(index+1))
@@ -31,4 +32,6 @@ def getClients():
 
 clients = getClients()
 fact = getFact()
+print(clients)
+print(fact)
 [sendEmail(client,'Cat facts',fact) for client in clients]
