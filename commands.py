@@ -2,43 +2,115 @@ import time
 import os
 import json
 import html
+import sqlite3
 
 import ezemail
 from basic import *
 
+connection = sqlite3.connect(folder()+'data.sql', check_same_thread=False)
+connection.cursor().execute('PRAGMA foreign_keys = ON;')
+
+def checkCreds(username,password):
+	return connection.cursor().execute(
+		'SELECT password FROM users where username=?',
+		(username,)
+	).fetchone() != password
+def prefs(username):
+	return dict( connection.cursor().execute(
+		'''SELECT preference, value from preferences
+		WHERE username == ?''',
+		(username,)
+	).fetchall() )
+def login(contents):
+	return {'status':0,'message':'<h1>Welcome. Enjoy your premium <a href="content.html#posts">membership.</a></h1>'}
+
 def posts(contents):
-	postnames = os.listdir(folder()+'posts')
-	postnames.sort(reverse=True)
 	start = contents['data']['start']
 	length = int(prefs(contents['username'])['postnumber'])
-	if start+length > len(postnames):
-		toSend = postnames[start:]
-	else:
-		toSend = postnames[start:start+length]
-	toSend = [readJSON(folder()+'posts/'+postname) for postname in toSend]
-	return {'posts':toSend,'start':start}
+	return {'posts': [
+		{
+			'time':message[0],
+			'title':message[1],
+			'author':message[2],
+			'contents':message[3]
+		}
+		for message in connection.cursor().execute(
+			'''
+				SELECT * from (
+					SELECT * from (
+						SELECT 
+							time,
+							title,
+							author,
+							content
+						FROM posts
+						ORDER BY time DESC
+						LIMIT ?
+					)
+					ORDER BY time ASC
+					LIMIT  ?
+				)
+				ORDER BY time DESC
+			;''',
+			(
+				start+length,
+				length
+			)
+		).fetchall()
+	],'start':start}
 def post(contents):
 	post = contents['data']
-	posttime = time.time()
-	post['title'] = html.escape(post['title'])
-	post['contents'] = html.escape(post['contents'])
-	post.update({'time':posttime,'author':contents['username'],'comments':[]})
-	writeJSON(folder()+'posts/'+str(posttime),post)
-	writeJSON(folder()+'comments/'+str(posttime),{"comments":[]})
+	connection.cursor().execute(
+		'''
+			INSERT INTO posts
+			VALUES (?, ?, ?, ?, ?)
+		''',(
+			time.time(),
+			html.escape(post['title']),
+			contents['username'],
+			html.escape(post['contents']),
+			'[]'
+		)
+	)
+	connection.commit()
 	return {'status':0}
-	
 
 def comments(contents):
-	postnum = str(contents['data']['post'])
-	post     = readJSON(folder()+'posts/'   +postnum)
-	comments = readJSON(folder()+'comments/'+postnum)
-	comments = comments['comments']
-	return {'post':post,'comments':comments}
+	postnum = contents['data']['post']
+	post = connection.cursor().execute(
+		'''
+			SELECT 
+				time,
+				title,
+				author,
+				content,
+				comments
+			FROM posts
+			WHERE time=?
+		;''',
+		(postnum,)
+	).fetchone()
+	return {
+		'post':{
+			'time':post[0],
+			'title':post[1],
+			'author':post[2],
+			'contents':post[3]
+		},
+		'comments':json.loads(post[4]),
+	}
 def comment(contents):
 	posttime = time.time()
 	commentid=contents['data']['comment']
-	commentfilename = folder()+'comments/'+str(contents['data']['post'])
-	comments = readJSON(commentfilename)['comments']
+	post = contents['data']['post']
+	comments = json.loads(connection.cursor().execute(
+		'''
+			SELECT (comments) FROM posts
+			WHERE time=?
+		;''',(
+			post,
+		)
+	).fetchone()[0])#TODO: prevent race condition, someone else could comment in this time
 	def findComment(tree,commentid):
 		if tree['time']==commentid:
 			return tree
@@ -49,11 +121,29 @@ def comment(contents):
 					return status
 			return False
 
-	comment = findComment({'time':contents['data']['post'], 'comments':comments},commentid)
-
-	comment['comments'].append({'time':posttime,'author':contents['username'],'content':contents['data']['content'],'comments':[]})
-	writeJSON(commentfilename, {'comments':comments})
-	return {'message':'Commented!','post':contents['data']['post']}
+	comment = findComment(
+		{'time':contents['data']['post'],'comments':comments},
+		commentid
+	)
+	comment['comments'].append(
+		{
+			'time':posttime,
+			'author':contents['username'],
+			'content':contents['data']['content'],
+			'comments':[]
+	})
+	connection.cursor().execute(
+		'''
+			UPDATE posts
+			SET comments = ?
+			WHERE time=?
+		''',(
+			json.dumps(comments),
+			post
+		)
+	)
+	connection.commit()
+	return {'message':'Commented!'}
 
 def checkPath(path):
 	if '..' in path: return {'status':0,'excuse':'You cant have a \'..\' in a filename, got it?'}
@@ -111,56 +201,134 @@ def editFile(contents):
 	return {'status':'0'}
 
 def messagers(contents):
-	messagerlecian = os.listdir(folder()+'user/'+contents['username']+'/messages/')
-	return {'messagers':messagerlecian}
+	def otherUser(pair, user):
+		return pair[ (pair.index(user)+1) % 2 ]
+	username = contents['username']
+	return {'messagers':[
+		otherUser(userPair,username)
+		for userPair in connection.cursor().execute(
+			'''
+				SELECT user1, user2
+				FROM messagers
+				WHERE user1=? or user2=?
+			;''',
+			(username,)*2
+		).fetchall()
+	]}
 def messager(contents):
 	targetName = contents['data']['name']
 	ownname = contents['username']
 	owndir = folder()+'user/'+ownname+'/messages/'
 	targetDir = folder()+'user/'+targetName+'/messages/'
-	if targetName in os.listdir(owndir):
-		return {'status':1,'excuse':'already there, dummy'}
-	else:
-		os.mkdir(owndir+targetName)
-		os.symlink(owndir+targetName,targetDir+ownname)
-		return {'status':'0'}
+	
+	connection.cursor().execute(
+		'''
+			INSERT INTO messagers(user1,user2)
+			VALUES (?,?)
+		''',
+		(min(targetName,ownname),max(targetName,ownname))
+	)
+	connection.commit()
+	#if targetName in os.listdir(owndir):
+	#	return {'status':1,'excuse':'already there, dummy'}
+	return {'status':'0'}
 
 def messages(contents):
 	start = contents['data']['end']
-	directory = folder()+'user/'+contents['username']+'/messages/'+contents['data']['user']
-	messagelecian = os.listdir(directory)
-	messagelecian = [float(messagelecian_item) for messagelecian_item in messagelecian]
-	messagelecian.sort(reverse=True)
-	if start == None:
-		startnum = 0
-	else:
-		startnum = messagelecian.index(start)+1
+	if start == None: start=1e100
+	username = contents['username']
+	target = contents['data']['user']
 	#length = prefs(contents['username'])['messagenum']
-	length=8
-	return {'messages':[readJSON(directory+'/'+str(messagelecian_item)) for messagelecian_item in messagelecian[startnum:startnum+length]]}
+	return {'messages': [
+		{
+			'time':message[0],
+			'author':message[1],
+			'content':message[2]
+		}
+		for message in connection.cursor().execute(
+			'''
+				SELECT time, author, content
+				FROM messages
+				JOIN messagers
+				ON messages.usersid=messagers.id
+				WHERE time<?
+				AND user1=?
+				AND user2=?
+				ORDER BY time DESC
+				LIMIT 8
+			;''',
+			(
+				start,
+				min(username,target),
+				max(username,target)
+			)
+		).fetchall()
+	]}
 def updateMessages(contents):
 	end = contents['data']['start']
-	directory = folder()+'user/'+contents['username']+'/messages/'+contents['data']['user']
-	messagelecian = os.listdir(directory)
-	messagelecian = [float(messagelecian_item) for messagelecian_item in messagelecian]
-	messagelecian.sort(reverse=True)
-	endnum = messagelecian.index(end)
-	return {'messages':[readJSON(directory+'/'+str(messagelecian_item)) for messagelecian_item in messagelecian[:endnum]]}
+	username = contents['username']
+	target = contents['data']['user']
+	return {'messages': [
+		{
+			'time':message[0],
+			'author':message[1],
+			'content':message[2]
+		}
+		for message in connection.cursor().execute(
+			'''
+				SELECT time, author, content
+				FROM messages
+				JOIN messagers
+				ON messages.usersid=messagers.id
+				WHERE time>?
+				AND user1=?
+				AND user2=?
+				ORDER BY time DESC
+				LIMIT 8
+			;''',
+			(
+				end,
+				min(username,target),
+				max(username,target)
+			)
+		).fetchall()
+	]}
 def message(contents):
 	target = contents['data']['user']
 	ownname = contents['username']
 	content = contents['data']['content']
 	sendtime = time.time()
 
-	filepath = folder()+'user/'+ownname+'/messages/'+target+'/'+str(sendtime)
-	writeJSON(filepath,{'time':sendtime,'content':content,'author':ownname})
-		
+	connection.cursor().execute(
+		'''
+			INSERT INTO messages
+			SELECT id, ?, ?, ?
+			FROM messagers
+			WHERE user1=? and user2=?
+		;''',
+		(
+			sendtime,
+			ownname,
+			content,
+
+			min(ownname,target),
+			max(ownname,target)
+		)
+	)
+	connection.commit()
 
 def preferences(contents):
 	return {'prefs':prefs(contents['username'])}
 def preference(contents):
-	preffile = folder()+'user/'+contents['username']+'/preferences'
-	writeJSON(preffile,contents['data'])
+	connection.cursor().executemany('''
+		UPDATE preferences
+		SET value = ?
+		WHERE username = ? AND preference = ?;
+	''',[
+		(value, contents['username'], preference)
+		for preference, value in contents['data'].items()
+	]);
+	connection.commit()
 	return {'status':'0'}
 
 

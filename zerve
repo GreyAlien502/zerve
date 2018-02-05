@@ -1,14 +1,8 @@
 #!/usr/bin/env python3 
 import cherrypy
-
-import math
-import time
-import sys
 import json
 
-import base
 import commands
-import basic
 
 class zerver():
 	@cherrypy.expose(['memebers.js'])
@@ -76,40 +70,3 @@ if __name__ == '__main__':
 	cherrypy.config.update({'environment' : 'production'})
 	cherrypy.quickstart(zerver(),'/')
 
-'''
-	def send(destination,content):
-		block_size = 2300
-		checkconnection=False
-		if len(content) < block_size:
-			base.chat(destination,'0'+content)
-		else:
-			blocked_size = block_size*math.floor(len(content)/block_size)
-			lecian = [content[i:i+block_size] for i in range(block_size,len(content)-block_size,block_size)]
-			
-			base.chat(destination,'1'+content[:block_size])
-			for lecian_item in lecian:
-				base.chat(destination,'1'+lecian_item)
-			base.chat(destination,'0'+content[blocked_size:])
-
-
-
-	hat = "zerving_hat"
-#print ('working')
-	while True:
-		#sys.stdout.write('.')
-		#sys.stdout.flush()
-		try:
-			response = base.keep(hat)
-		except:
-			response = []
-		if 'events' in response:
-			#print()
-			for event in response['events']:
-				if event['type'] == 'disconnect':
-					process(json.loads(event['from']))
-					.log(
-						"@"+datetime.datetime.utcnow()+' '+
-						event['command']+":"+
-						event['user'])
-		time.sleep(.8)
-	'''
