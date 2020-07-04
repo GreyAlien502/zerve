@@ -14,7 +14,7 @@ def checkCreds(username,password):
 	return connection.cursor().execute(
 		'SELECT password FROM users where username=?',
 		(username,)
-	).fetchone() != password
+	).fetchone() == (password,)
 def prefs(username):
 	return dict( connection.cursor().execute(
 		'''SELECT preference, value from preferences
